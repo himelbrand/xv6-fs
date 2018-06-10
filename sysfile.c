@@ -36,6 +36,13 @@ argfd(int n, int *pfd, struct file **pf)
   return 0;
 }
 
+// @Added: task 3 file* getter via fd
+// available for fs.c usage
+int
+getFd(int *pfd, struct file **pf){
+  return argfd(0, pfd, pf);
+}
+
 // Allocate a file descriptor for the given file.
 // Takes over file reference from caller on success.
 static int

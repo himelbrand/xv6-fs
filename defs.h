@@ -54,7 +54,7 @@ void            stati(struct inode*, struct stat*);
 int             writei(struct inode*, char*, uint, uint);
 int             ftag(int fd, const char*, const char*);		//@Added: task 3
 int             funtag(int fd, const char*);				//@Added: task 3
-int 			gettag(int fd, const char*, const char*);	//@Added: task 3
+int 			gettag(int fd, const char*, char*);			//@Added: task 3
 
 // ide.c
 void            ideinit(void);
@@ -158,7 +158,7 @@ int             argstr(int, char**);
 int             fetchint(uint, int*);
 int             fetchstr(uint, char**);
 void            syscall(void);
-//int 			argfd(int n, int *pfd, struct file **pf);	//@Added: Task 3 - access file via fd
+int 			getFd(int *pfd, struct file **pf);	//@Added: Task 3 - access file via fd
 
 // timer.c
 void            timerinit(void);
