@@ -786,7 +786,6 @@ funtag(int fd, const char *key) {
     // key found
     if ((strlen(key) == strlen((char*)(&bp->data[j]))) && !(memcmp(key, &(bp->data[j]), strlen(key)))) {
       memset(&bp->data[j], 0, 40);  // delete the entry
-  
       ip->tCounter--;
       log_write(bp);
       brelse(bp);
@@ -816,10 +815,12 @@ gettag(int fd, const char* key, char* buf){
   struct buf *bp;
   int i = 0;
   int j = 0;
-
+  cprintf("1***\n");
   // check for valid file and get the filePtr
   if ((getFd(&fd, &filePtr)) < 0)
     return -1;  // fail
+
+  cprintf("2***\n"); 
 
   ip = filePtr->ip;
   ilock(ip);
@@ -829,12 +830,15 @@ gettag(int fd, const char* key, char* buf){
       iunlock(ip);
       return -1;  // fail
   }
+  cprintf("3***\n");
+
   bp = bread(ip->dev, ip->tags);
   i = 0;
   j = 0;
   while (i < ip->tCounter) {
     // key found
     if ((strlen(key) == strlen((char*)(&bp->data[j]))) && !(memcmp(key, &(bp->data[j]), strlen(key)))) {  
+      cprintf("FOUND THE TAG!!"); 
       memmove(buf,&bp->data[j+10], 30);                                  
       log_write(bp);
       brelse(bp);
@@ -853,5 +857,5 @@ gettag(int fd, const char* key, char* buf){
   brelse(bp);
   iupdate(ip);
   iunlock(ip);
-  return -1;
+  return -1; // fail
 }
