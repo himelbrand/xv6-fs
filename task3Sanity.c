@@ -14,7 +14,7 @@ void testFtag(char *filePath){
             printf(1, "ftag test fail\n");
     }
     else
-        printf(1,"filePath couldn't open\n");
+        printf(1,"testFtag: filePath couldn't open\n");
 
     close(fd);
 }   
@@ -29,7 +29,7 @@ void testFuntag(char *filePath){
             printf(1, "funtag test fail\n");
     }
     else
-        printf(1,"filePath couldn't open\n");
+        printf(1,"testFuntag: filePath couldn't open\n");
 
     close(fd);
 }
@@ -41,19 +41,16 @@ void testGettag(char *filePath){
 
     fd = open(filePath, O_RDWR);
     valueLen = gettag(fd, "testKey", buf);
-    
-    printf(1, "buf = %s\n", buf);
-    printf(1, "valueLen = %d\n", valueLen);
+   
     if(fd){
-        if(gettag(fd, "testKey", buf) != -1){
-            printf(1, "found! value = $s\n", buf);
+        if(valueLen == strlen("testValue")){
             printf(1, "fgettag test success\n");
         }
         else
             printf(1, "fgettag test fail\n");
     }
     else
-        printf(1,"filePath couldn't open\n");
+        printf(1,"testGettag: filePath couldn't open\n");
 
     close(fd);
 }
