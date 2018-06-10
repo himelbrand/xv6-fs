@@ -590,3 +590,41 @@ int readlink(char *pathname, char *buf, uint bufsize)
   iunlock(ip);
   return -1;
 }
+
+int
+sys_ftag(void) {
+  int fd, res;
+  char *key;
+  char *value;
+  struct file *f;
+
+  //check for valid arguments
+  if(argfd(0, &fd, &f) < 0 || argstr(1, &key) < 0  || argstr(2, &value) < 0)
+      return -1;
+
+  begin_op();
+  res = ftag(fd, key, value);
+  end_op();
+
+  return res;
+}
+
+int sys_funtag(void) {
+    int fd, res;
+    char *key;
+    struct file *f;
+
+    //check for valid arguments
+    if(argfd(0, &fd, &f) < 0 || argstr(1, &key) < 0)
+        return -1;
+
+    begin_op();
+    res = funtag(fd, key);
+    end_op();
+    
+    return res;
+}
+
+int sys_gettag(void) {
+    return -1;
+}

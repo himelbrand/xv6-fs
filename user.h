@@ -25,6 +25,9 @@ int sleep(int);
 int uptime(void);
 int symlink(char*, char*);
 int readlink(char*, char*, uint);
+int ftag(int, const char*, const char*);	//@Added: system call task 3
+int funtag(int, const char*);				//@Added: system call task 3
+int gettag(int, const char*, const char*);	//@Added: system call task 3
 
 // ulib.c
 int stat(char*, struct stat*);

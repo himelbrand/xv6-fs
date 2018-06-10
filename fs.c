@@ -21,6 +21,7 @@
 #include "buf.h"
 #include "file.h"
 
+
 #define min(a, b) ((a) < (b) ? (a) : (b))
 static void itrunc(struct inode*);
 // there should be one superblock per disk device, but we run with
@@ -691,4 +692,118 @@ struct inode*
 nameiparent(char *path, char *name)
 {
   return namex(path, 1, name);
+}
+
+
+int
+ftag(int fd, const char *key, const char *value) {
+  struct file *filePtr = 0;
+  struct inode *ip;
+  struct buf *bp;
+  int i = 0;
+  int j = 0;
+
+  // check for valid file and get the filePtr
+  if ((argfd(0, &fd, &filePtr)) < 0)
+    return -1;  // fail
+
+  int addInd = -1;
+  ip = filePtr->ip;
+  ilock(ip);
+
+  // allocate for new tag
+  if ((ip->tCounter == 0) && (ip->tags == 0)) {
+      ip->tags = balloc(ip->dev); 
+  }
+
+  bp = bread(ip->dev, ip->tags);
+
+  while (i < ip->tCounter) {
+    /* key found */
+    if ((strlen(key) == strlen((char*)(&bp->data[j]))) && !(memcmp(key, &(bp->data[j]), strlen(key)))) {
+      // override existing value if any
+      memset(&bp->data[j+10], 0, 30);
+      memmove(&bp->data[j+10], value, strlen(value));
+      ip->tCounter++;
+      log_write(bp);
+      brelse(bp);
+      iupdate(ip);
+      iunlock(ip);
+      return 0;   //success
+    }
+    // reached the end
+    if (bp->data[j] == 0) {
+        if (addInd == -1)
+            addInd = j;
+        i--;
+    }
+    i++;
+    j += 40;  // 10 for key, 30 for value, 40 total
+  } // end of while loop
+
+  if (addInd == -1)
+      addInd = j;
+
+  // key wasn't found, addInd is the next free slot
+  memset(&bp->data[addInd], 0, 40);
+  memmove(&bp->data[addInd], key, strlen(key));
+  memmove(&bp->data[addInd+10], value, strlen(value));
+  
+  ip->tCounter++;
+  log_write(bp);
+  brelse(bp);
+  iupdate(ip);
+  iunlock(ip);
+  return 0; //success
+}
+
+
+
+int
+funtag(int fd, const char *key) {
+  struct file *filePtr = 0;
+  struct inode *ip;
+  struct buf *bp;
+  int i = 0;
+  int j = 0;
+
+  // check for valid file and get the filePtr
+  if ((argfd(0, &fd, &filePtr)) < 0)
+    return -1;  // fail
+
+  ip = filePtr->ip;
+  ilock(ip);
+
+  // no tags on the current inode - fail
+  if ((ip->tCounter == 0) && (ip->tags == 0)) {
+      iunlock(ip);
+      return -1;  // faild
+  }
+
+  bp = bread(ip->dev, ip->tags);
+
+  while (i < ip->tCounter) {
+    /* key found */
+    if ((strlen(key) == strlen((char*)(&bp->data[j]))) && !(memcmp(key, &(bp->data[j]), strlen(key)))) {
+      memset(&bp->data[j], 0, 40);  // delete the entry
+  
+      ip->tCounter--;
+      log_write(bp);
+      brelse(bp);
+      iupdate(ip);
+      iunlock(ip);
+      return 0;   //success
+    }
+    // reached the end and didn't found - fail
+    if (bp->data[j] == 0) {
+        i--;
+    }
+
+    i++;
+    j += 40;  // 10 for key, 30 for value, 40 total
+  } // end of while loop
+
+  brelse(bp);
+  iunlock(ip);
+  return -1; //fail
 }
