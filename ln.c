@@ -4,7 +4,7 @@
 
 int main(int argc, char *argv[])
 {
-  if (argc != 3 || (argc != 4 || (argc == 4 && !strcmp(argv[2], "-s"))))
+  if (argc != 3 && (argc != 4 || (argc == 4 && !strcmp(argv[2], "-s"))))
   {
     printf(2, "Usage: ln old new\n");
     printf(2, "or\n");

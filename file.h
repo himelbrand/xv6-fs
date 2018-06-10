@@ -19,12 +19,13 @@ struct inode {
 
   short type;         // copy of disk inode
   short major;
-  short minor;
+  short minor; 
   short nlink;
   uint size;
   uint addrs[NDIRECT+2];  //@Edited: was +1, update to +2 for double indirect
   uint tags;              //@Added: tags block ptr
   uint tCounter;          //@Added: number of tags allocated
+  char symlink;
 };
 
 // table mapping major device number to
@@ -37,3 +38,4 @@ struct devsw {
 extern struct devsw devsw[];
 
 #define CONSOLE 1
+#define MAX_DEREFERENCE 31
