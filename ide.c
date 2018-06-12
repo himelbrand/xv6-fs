@@ -1,4 +1,5 @@
 // Simple PIO-based (non-DMA) IDE driver code.
+#include <stddef.h>
 
 #include "types.h"
 #include "defs.h"

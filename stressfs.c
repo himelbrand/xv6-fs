@@ -6,10 +6,10 @@
 // after about 5 runs of stressfs in QEMU on a 2.1GHz CPU:
 //    for (i = 0; i < 40000; i++)
 //      asm volatile("");
-
+#include <stddef.h>
 #include "types.h"
 #include "stat.h"
-#include "user.h"
+#include "user.h" 
 #include "fs.h"
 #include "fcntl.h"
 

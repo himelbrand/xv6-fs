@@ -1,6 +1,7 @@
 //
 // File descriptors
 //
+#include <stddef.h>
 
 #include "types.h"
 #include "defs.h"

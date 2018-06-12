@@ -1,6 +1,7 @@
 // The I/O APIC manages hardware interrupts for an SMP system.
 // http://www.intel.com/design/chipsets/datashts/29056601.pdf
 // See also picirq.c.
+#include <stddef.h>
 
 #include "types.h"
 #include "defs.h"

@@ -8,6 +8,7 @@
 // This file contains the low-level file system manipulation
 // routines.  The (higher-level) system call implementations
 // are in sysfile.c.
+#include <stddef.h>
 
 #include "types.h"
 #include "defs.h"

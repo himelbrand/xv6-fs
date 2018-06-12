@@ -1,7 +1,7 @@
 // Console input and output.
 // Input is from the keyboard or serial port.
 // Output is written to the screen and serial port.
-
+#include <stddef.h>
 #include "types.h"
 #include "defs.h"
 #include "param.h"

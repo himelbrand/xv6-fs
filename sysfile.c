@@ -3,6 +3,7 @@
 // Mostly argument checking, since we don't trust
 // user code, and calls into file.c and fs.c.
 //
+#include <stddef.h>
 
 #include "types.h"
 #include "defs.h"
@@ -15,7 +16,7 @@
 #include "sleeplock.h"
 #include "file.h"
 #include "fcntl.h"
-int readlink(char *pathname, char *buf, uint bufsize); //fwd dclaration
+int readlink(char *pathname, char *buf, size_t bufsize); //fwd dclaration
 
 // Fetch the nth word-sized system call argument as a file descriptor
 // and return both the descriptor and the corresponding struct file.
@@ -572,9 +573,9 @@ int sys_readlink(void)
   if (argstr(0, &pathname) < 0 || argstr(1, &buf) < 0 || argint(2, &bufsize))
     return -1;
   else
-    return readlink(pathname, buf, (uint)bufsize);
+    return readlink(pathname, buf, (size_t)bufsize);
 }
-int readlink(char *pathname, char *buf, uint bufsize)
+int readlink(char *pathname, char *buf, size_t bufsize)
 {
   struct inode *ip; //, *sym_ip;
                     // int i;

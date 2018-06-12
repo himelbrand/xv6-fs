@@ -192,7 +192,7 @@ void            clearpteu(pde_t *pgdir, char *uva);
 
 
 //sysfile.c
-int             readlink(char*, char*, uint);
+int             readlink(char*, char*, size_t);
 
 // number of elements in fixed-size array
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))

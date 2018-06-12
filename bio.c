@@ -17,7 +17,7 @@
 // * B_VALID: the buffer data has been read from the disk.
 // * B_DIRTY: the buffer data has been modified
 //     and needs to be written to disk.
-
+#include <stddef.h>
 #include "types.h"
 #include "defs.h"
 #include "param.h"

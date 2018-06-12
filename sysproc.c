@@ -1,3 +1,4 @@
+#include <stddef.h>
 #include "types.h"
 #include "x86.h"
 #include "defs.h"

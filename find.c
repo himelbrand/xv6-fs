@@ -1,5 +1,6 @@
 #include "types.h"
 #include "stat.h"
+#include <stddef.h>
 #include "user.h"
 #include "fs.h"
 
@@ -95,7 +96,7 @@ int find(char *path, char *name)
     int fd;
     struct dirent de;
     struct stat st;
-    if ((!follow) && (readlink(path, sympath, (uint)64) != -1))
+    if ((!follow) && (readlink(path, sympath, 64) != -1))
     { //handle symlink - when no follow , if follow it will become T_FILE or T_DIR
         if ((fname[0] != 0) && (strcmp(fname, name) != 0))
             return 0;

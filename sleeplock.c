@@ -1,4 +1,5 @@
 // Sleeping locks
+#include <stddef.h>
 
 #include "types.h"
 #include "defs.h"

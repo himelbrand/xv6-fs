@@ -1,5 +1,5 @@
 // init: The initial user-level program
-
+ #include <stddef.h>
 #include "types.h"
 #include "stat.h"
 #include "user.h"
