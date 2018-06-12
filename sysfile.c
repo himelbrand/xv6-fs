@@ -36,6 +36,13 @@ argfd(int n, int *pfd, struct file **pf)
   return 0;
 }
 
+// @Added: task 3 file* getter via fd
+// available for fs.c usage
+int
+getFd(int *pfd, struct file **pf){
+  return argfd(0, pfd, pf);
+}
+
 // Allocate a file descriptor for the given file.
 // Takes over file reference from caller on success.
 static int
@@ -626,5 +633,19 @@ int sys_funtag(void) {
 }
 
 int sys_gettag(void) {
-    return -1;
+  int fd, res;
+  char *key;
+  char *buf;
+  struct file *f;
+
+
+  //check for valid arguments
+  if(argfd(0, &fd, &f) < 0 || argstr(1, &key) < 0 || argstr(2, &buf) < 0)
+      return -1;
+
+  begin_op();
+  res = gettag(fd, key, buf);
+  end_op();
+  
+  return res;   
 }

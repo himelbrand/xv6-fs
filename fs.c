@@ -696,14 +696,14 @@ nameiparent(char *path, char *name)
 
 int
 ftag(int fd, const char *key, const char *value) {
-  struct file *filePtr = 0;
+  struct file *filePtr;
   struct inode *ip;
   struct buf *bp;
   int i = 0;
   int j = 0;
 
   // check for valid file and get the filePtr
-  if ((argfd(0, &fd, &filePtr)) < 0)
+  if ((getFd(&fd, &filePtr)) < 0)
     return -1;  // fail
 
   int addInd = -1;
@@ -718,7 +718,7 @@ ftag(int fd, const char *key, const char *value) {
   bp = bread(ip->dev, ip->tags);
 
   while (i < ip->tCounter) {
-    /* key found */
+    // key found
     if ((strlen(key) == strlen((char*)(&bp->data[j]))) && !(memcmp(key, &(bp->data[j]), strlen(key)))) {
       // override existing value if any
       memset(&bp->data[j+10], 0, 30);
@@ -760,14 +760,14 @@ ftag(int fd, const char *key, const char *value) {
 
 int
 funtag(int fd, const char *key) {
-  struct file *filePtr = 0;
+  struct file *filePtr;
   struct inode *ip;
   struct buf *bp;
   int i = 0;
   int j = 0;
 
   // check for valid file and get the filePtr
-  if ((argfd(0, &fd, &filePtr)) < 0)
+  if ((getFd(&fd, &filePtr)) < 0)
     return -1;  // fail
 
   ip = filePtr->ip;
@@ -782,10 +782,9 @@ funtag(int fd, const char *key) {
   bp = bread(ip->dev, ip->tags);
 
   while (i < ip->tCounter) {
-    /* key found */
+    // key found
     if ((strlen(key) == strlen((char*)(&bp->data[j]))) && !(memcmp(key, &(bp->data[j]), strlen(key)))) {
       memset(&bp->data[j], 0, 40);  // delete the entry
-  
       ip->tCounter--;
       log_write(bp);
       brelse(bp);
@@ -805,4 +804,51 @@ funtag(int fd, const char *key) {
   brelse(bp);
   iunlock(ip);
   return -1; //fail
+}
+
+
+int
+gettag(int fd, const char* key, char* buf){
+  struct file *filePtr;
+  struct inode *ip;
+  struct buf *bp;
+  int i = 0;
+  int j = 0;
+  // check for valid file and get the filePtr
+  if ((getFd(&fd, &filePtr)) < 0)
+    return -1;  // fail
+
+  ip = filePtr->ip;
+  ilock(ip);
+
+  // no tags on the current inode - fail
+  if ((ip->tCounter == 0) || (ip->tags == 0)) {
+      iunlock(ip);
+      return -1;  // fail
+  }
+
+  bp = bread(ip->dev, ip->tags);
+
+  while (i < ip->tCounter) {
+    // key found
+    if ((strlen(key) == strlen((char*)(&bp->data[j]))) && !(memcmp(key, &(bp->data[j]), strlen(key)))) {  
+      memmove(buf,&bp->data[j+10], 30);                                  
+      log_write(bp);
+      brelse(bp);
+      iupdate(ip);
+      iunlock(ip);
+      return strlen(buf); // success
+    }
+    if (bp->data[j] == 0)
+        i--;
+
+    i++;
+    j += 40;
+  }
+
+  log_write(bp);
+  brelse(bp);
+  iupdate(ip);
+  iunlock(ip);
+  return -1; // fail
 }
