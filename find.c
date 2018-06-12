@@ -32,7 +32,7 @@ fmtname(char *path) //taken from ls.c
 }
 int filter(int fd, struct stat st, char *name)
 {
-    //char buf[30];
+    char buf[30];
 
     if ((fname[0] != 0) && (strcmp(fname, name) != 0))
         return 0;
@@ -75,15 +75,15 @@ int filter(int fd, struct stat st, char *name)
     }
     if ((key[0] != 0) && (val[0] != 0))
     { //TODO: add this part after gettag is implemented
-        // if (gettag(fd, key, buf) > 0)
-        // {
-        //     if (strcmp(val, "?") && strcmp(val, buf)) //not wild card and not equal
-        //         return 0;
-        // }
-        // else //not found
-        // {
-        //     return 0;
-        // }
+        if (gettag(fd, key, buf) > 0)
+        {
+            if (strcmp(val, "?") && strcmp(val, buf)) //not wild card and not equal
+                return 0;
+        }
+        else //not found
+        {
+            return 0;
+        }
     }
     return 1; //keep this file
 }
