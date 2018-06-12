@@ -38,8 +38,8 @@ argfd(int n, int *pfd, struct file **pf)
 
 // @Added: task 3 file* getter via fd
 // available for fs.c usage
-int
-getFd(int *pfd, struct file **pf){
+int getFd(int *pfd, struct file **pf)
+{
   return argfd(0, pfd, pf);
 }
 
@@ -129,7 +129,7 @@ int sys_link(void)
     return -1;
 
   begin_op();
-  if ((ip = namei(old)) == 0)
+  if ((ip = namei(old, 1)) == 0)
   {
     end_op();
     return -1;
@@ -265,6 +265,11 @@ create(char *path, short type, short major, short minor)
     ilock(ip);
     if (type == T_FILE && ip->type == T_FILE)
       return ip;
+    if (type == T_SYMLINK)
+    {
+      ip->symlink = 1;
+      return ip;
+    }
     iunlockput(ip);
     return 0;
   }
@@ -289,8 +294,7 @@ create(char *path, short type, short major, short minor)
 
   if (dirlink(dp, name, ip->inum) < 0)
     panic("create: dirlink");
-  if(type == T_SYMLINK)
-    ip->symlink = 1;
+
   iunlockput(dp);
 
   return ip;
@@ -298,12 +302,12 @@ create(char *path, short type, short major, short minor)
 
 int sys_open(void)
 {
-  char *path;
+  char *path;//,pathname[64];
   int fd, omode;
   struct file *f;
-  struct inode *ip,*sym_ip;
- int i;
- struct proc * p=myproc();
+  struct inode *ip; //,*sym_ip;
+                    //int i;
+                    //struct proc * p=myproc();
   if (argstr(0, &path) < 0 || argint(1, &omode) < 0)
     return -1;
 
@@ -320,40 +324,57 @@ int sys_open(void)
   }
   else
   {
-    if ((ip = namei(path)) == 0)
-    {
-      end_op();
-      return -1;
-    }
-    ilock(ip);
-    if (ip->type == T_DIR && omode != O_RDONLY)
-    {
-      iunlockput(ip);
-      end_op();
-      return -1;
-    }
-  }
-  //check if symlink no dereferrancing for ls
-  for (i = 0; i < MAX_DEREFERENCE && strncmp(p->name,"ls",2); i++)
-  {
-    if (ip->symlink)
-    {
-      if ((sym_ip = namei((char *)ip->addrs)) == 0)
+    // if (readlink(path, pathname, 64) == 0)
+    // {
+    //   if ((ip = namei(pathname, 1)) == 0)
+    //   {
+    //     end_op();
+    //     return -1;
+    //   }
+    //   cprintf("pathname=%s\n inum=%d\n",pathname,ip->inum);
+    //   ilock(ip);
+    //   if (ip->type == T_DIR && omode != O_RDONLY)
+    //   {
+    //     iunlockput(ip);
+    //     end_op();
+    //     return -1;
+    //   }
+    // }else{
+      if ((ip = namei(path, 1)) == 0)
       {
-        iunlock(ip);
+        end_op();
         return -1;
       }
-
-      iunlock(ip);
-      ip = sym_ip;
       ilock(ip);
-    }
-    else
-    {
-      break; /* found the non-symlink file. last
-                                   link in ip. */
-    }
+      if (ip->type == T_DIR && omode != O_RDONLY)
+      {
+        iunlockput(ip);
+        end_op();
+        return -1;
+      }
+    //}
   }
+  //check if symlink no dereferrancing for ls
+  // for (i = 0; i < MAX_DEREFERENCE && strncmp(p->name,"ls",2); i++)
+  // {
+  //   if (ip->symlink)
+  //   {
+  //     if ((sym_ip = namei((char *)ip->addrs,1)) == 0)
+  //     {
+  //       iunlock(ip);
+  //       return -1;
+  //     }
+
+  //     iunlock(ip);
+  //     ip = sym_ip;
+  //     ilock(ip);
+  //   }
+  //   else
+  //   {
+  //     break; /* found the non-symlink file. last
+  //                                  link in ip. */
+  //   }
+  // }
 
   if ((f = filealloc()) == 0 || (fd = fdalloc(f)) < 0)
   {
@@ -425,13 +446,13 @@ int sys_chdir(void)
   }
   if (readlink(path, pathname, 64) == 0)
   {
-    if ((ip = namei(pathname)) == 0)
+    if ((ip = namei(pathname, 1)) == 0)
     {
       end_op();
       return -1;
     }
   }
-  else if ((ip = namei(path)) == 0)
+  else if ((ip = namei(path, 1)) == 0)
   {
     end_op();
     return -1;
@@ -514,10 +535,10 @@ int sys_symlink(void)
     return -1;
   begin_op();
   ip = create(path, T_SYMLINK, 0, 0);
-  if (ip == 0){
+  if (ip == 0)
+  {
     end_op();
     return -1;
-
   }
   ip->symlink = 1;
   end_op();
@@ -535,7 +556,6 @@ int sys_symlink(void)
     panic("target soft link path is too long ");
   safestrcpy((char *)ip->addrs, target, 50);
   iunlock(ip);
-  //
 
   f->ip = ip;
   f->off = 0;
@@ -556,9 +576,9 @@ int sys_readlink(void)
 }
 int readlink(char *pathname, char *buf, uint bufsize)
 {
-  struct inode *ip, *sym_ip;
-  int i;
-  if ((ip = namei(pathname)) == 0)
+  struct inode *ip; //, *sym_ip;
+                    // int i;
+  if ((ip = namei(pathname, 1)) == 0)
     return -1;
   ilock(ip);
 
@@ -569,25 +589,25 @@ int readlink(char *pathname, char *buf, uint bufsize)
     return -1;
   }
 
-  for (i = 0; i < MAX_DEREFERENCE; i++)
-  {
-    if ((sym_ip = namei((char *)ip->addrs)) == 0)
-    {
-      iunlock(ip);
-      return -1;
-    }
-    if (sym_ip->symlink)
-    {
-      iunlock(ip);
-      ip = sym_ip;
-      ilock(ip);
-    }
-    else
-    {
-      break; /* found the non-symlink file. last
-                                   link in ip. */
-    }
-  }
+  // for (i = 0; i < MAX_DEREFERENCE; i++)
+  // {
+  //   if ((sym_ip = namei((char *)ip->addrs)) == 0)
+  //   {
+  //     iunlock(ip);
+  //     return -1;
+  //   }
+  //   if (sym_ip->symlink)
+  //   {
+  //     iunlock(ip);
+  //     ip = sym_ip;
+  //     ilock(ip);
+  //   }
+  //   else
+  //   {
+  //     break; /* found the non-symlink file. last
+  //                                  link in ip. */
+  //   }
+  // }
   if (ip->symlink)
   {
     safestrcpy(buf, (char *)ip->addrs, bufsize);
@@ -598,16 +618,16 @@ int readlink(char *pathname, char *buf, uint bufsize)
   return -1;
 }
 
-int
-sys_ftag(void) {
+int sys_ftag(void)
+{
   int fd, res;
   char *key;
   char *value;
   struct file *f;
 
   //check for valid arguments
-  if(argfd(0, &fd, &f) < 0 || argstr(1, &key) < 0  || argstr(2, &value) < 0)
-      return -1;
+  if (argfd(0, &fd, &f) < 0 || argstr(1, &key) < 0 || argstr(2, &value) < 0)
+    return -1;
 
   begin_op();
   res = ftag(fd, key, value);
@@ -616,36 +636,37 @@ sys_ftag(void) {
   return res;
 }
 
-int sys_funtag(void) {
-    int fd, res;
-    char *key;
-    struct file *f;
+int sys_funtag(void)
+{
+  int fd, res;
+  char *key;
+  struct file *f;
 
-    //check for valid arguments
-    if(argfd(0, &fd, &f) < 0 || argstr(1, &key) < 0)
-        return -1;
+  //check for valid arguments
+  if (argfd(0, &fd, &f) < 0 || argstr(1, &key) < 0)
+    return -1;
 
-    begin_op();
-    res = funtag(fd, key);
-    end_op();
-    
-    return res;
+  begin_op();
+  res = funtag(fd, key);
+  end_op();
+
+  return res;
 }
 
-int sys_gettag(void) {
+int sys_gettag(void)
+{
   int fd, res;
   char *key;
   char *buf;
   struct file *f;
 
-
   //check for valid arguments
-  if(argfd(0, &fd, &f) < 0 || argstr(1, &key) < 0 || argstr(2, &buf) < 0)
-      return -1;
+  if (argfd(0, &fd, &f) < 0 || argstr(1, &key) < 0 || argstr(2, &buf) < 0)
+    return -1;
 
   begin_op();
   res = gettag(fd, key, buf);
   end_op();
-  
-  return res;   
+
+  return res;
 }

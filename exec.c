@@ -21,7 +21,7 @@ int exec(char *path, char **argv)
   begin_op();
   if (readlink(path, pathname, 64) == 0)
   {
-    if ((ip = namei(pathname)) == 0)
+    if ((ip = namei(pathname,1)) == 0)
     {
       end_op();
       cprintf("exec: fail\n");
@@ -30,7 +30,7 @@ int exec(char *path, char **argv)
   }
   else
   {
-    if ((ip = namei(path)) == 0)
+    if ((ip = namei(path,1)) == 0)
     {
       end_op();
       cprintf("exec: fail\n");
