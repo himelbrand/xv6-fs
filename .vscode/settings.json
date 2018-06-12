@@ -4,6 +4,8 @@
         "x86.h": "c",
         "syscall.h": "c",
         "defs.h": "c",
-        "user.h": "c"
+        "user.h": "c",
+        "fcntl.h": "c",
+        "fs.h": "c"
     }
 }
