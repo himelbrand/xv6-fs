@@ -3,12 +3,12 @@
 #include "user.h" 
 #include "fcntl.h"
 
-void testFtag(char *filePath){
+void testFtag(char *filePath,int x){
     int fd;
     fd = open(filePath, O_RDWR);
     if(fd){
         // 0 - success, -1 - failed
-        if(ftag(fd, "testKey", "testValue") == 0)
+        if(ftag(fd, "testKey", x ? "x" : "y") == 0)
             printf(1, "ftag test success\n");
         
         else
@@ -44,7 +44,7 @@ void testGettag(char *filePath){
     valueLen = gettag(fd, "testKey", buf);
    
     if(fd){
-        if(valueLen == strlen("testValue")){
+        if(valueLen == 1){
             printf(1, "fgettag test success\n");
         }
         else
@@ -58,8 +58,13 @@ void testGettag(char *filePath){
 
 int main(int argc, char *argv[])
 {
-    testFtag("./echo");
+    testFtag("./echo",1);
     testGettag("./echo");
-  //  testFuntag("./echo");
+    testFuntag("./echo");
+    testFtag("./echo",1);
+    testFtag("./README",0);
+    testFtag("./task1Sanity",1);
+    testFtag("./mkdir",0);
+
     exit();
 }
