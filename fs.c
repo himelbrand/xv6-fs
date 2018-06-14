@@ -727,6 +727,7 @@ ftag(int fd, const char *key, const char *value) {
 
   int addInd = -1;
   ip = filePtr->ip;
+//  begin_op();
   ilock(ip);
 
   // allocate for new tag
@@ -747,6 +748,7 @@ ftag(int fd, const char *key, const char *value) {
       brelse(bp);
       iupdate(ip);
       iunlock(ip);
+ //     end_op();
       return 0;   //success
     }
     // reached the end
@@ -772,6 +774,7 @@ ftag(int fd, const char *key, const char *value) {
   brelse(bp);
   iupdate(ip);
   iunlock(ip);
+ // end_op();
   return 0; //success
 }
 
@@ -790,6 +793,7 @@ funtag(int fd, const char *key) {
     return -1;  // fail
 
   ip = filePtr->ip;
+//  begin_op();
   ilock(ip);
 
   // no tags on the current inode - fail
@@ -809,6 +813,7 @@ funtag(int fd, const char *key) {
       brelse(bp);
       iupdate(ip);
       iunlock(ip);
+  //    end_op();
       return 0;   //success
     }
     // reached the end and didn't found - fail
@@ -822,6 +827,7 @@ funtag(int fd, const char *key) {
 
   brelse(bp);
   iunlock(ip);
+//  end_op();
   return -1; //fail
 }
 
@@ -838,6 +844,7 @@ gettag(int fd, const char* key, char* buf){
     return -1;  // fail
 
   ip = filePtr->ip;
+ // begin_op();
   ilock(ip);
 
   // no tags on the current inode - fail
@@ -856,6 +863,7 @@ gettag(int fd, const char* key, char* buf){
       brelse(bp);
       iupdate(ip);
       iunlock(ip);
+   //   end_op();
       return strlen(buf); // success
     }
     if (bp->data[j] == 0)
@@ -869,5 +877,6 @@ gettag(int fd, const char* key, char* buf){
   brelse(bp);
   iupdate(ip);
   iunlock(ip);
+// end_op();
   return -1; // fail
 }

@@ -3,7 +3,6 @@
 #include "user.h" 
 #include "fcntl.h"
 
-
 void testFtag(char *filePath){
     int fd;
     fd = open(filePath, O_RDWR);
@@ -11,6 +10,7 @@ void testFtag(char *filePath){
         // 0 - success, -1 - failed
         if(ftag(fd, "testKey", "testValue") == 0)
             printf(1, "ftag test success\n");
+        
         else
             printf(1, "ftag test fail\n");
     }
@@ -60,6 +60,6 @@ int main(int argc, char *argv[])
 {
     testFtag("./echo");
     testGettag("./echo");
-    testFuntag("./echo");
+  //  testFuntag("./echo");
     exit();
 }
