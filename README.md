@@ -81,29 +81,50 @@ The function returns the length of value if successful and -1 on failure
 -**follow**
 Dereference symbolic links. If a symbolic link is encountered, apply tests to the target of
 the link. If a symbolic link points to a directory, then descend to it.
-Tests
-**-name <file name>**
+
+### Tests
+**-name** <file name>
 All files named (exactly, no wildcards) file name
--size <(+/-)n>
+  
+**-size** <(+/-)n>
 File is of size n (exactly), +n (more then n), -n (less then n)
--type <c>
+
+**-type** <c>
 File is of type c:
 d directory
 f regular file
 s soft (symbolic) link
--tag <key>=<value>
+  
+**-tag** <key>=<value>
 File is tagged by a specified key-value pair. If value equals “?” then all files having the
 key key are matched, regardless of the value. You may assume key and value do not
 contain spaces.
-Examples
+  
+### Examples
+
+```bash
 find / -type d -name home
+```
 Searches the whole file system for directories whose name is “home”
+
+```bash
 find /src -name xv6
+```
 Searches /src and all its subdirectories recursively for files, directories and links whose
 name is “xv6”
-Find / -type f -size +1024
+```bash
+find / -type f -size +1024
+```
 Finds all the files whose size is greater than 1KB (=1024 bytes)
+```bash
 find / -type f -tag episode=s03e07
+```
+Finds all files with a tag whose key equals ``episode’’ and whose key equals “s03e07”.
+```bash
+find / -d -tag genre=?
+```
+Finds all directories which have a tag with the key “genre”
+
 # ORIGINAL XV6 README
 
 xv6 is a re-implementation of Dennis Ritchie's and Ken Thompson's Unix
